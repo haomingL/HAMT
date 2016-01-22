@@ -50,14 +50,14 @@ public class Node {
 		 * @param hashcode to be used to add the signature
 		 * @param startIndex is the start index of the hash code
 		 */
-		public void addSignature(int hashcode, int startIndex) {
+		public void addSignature(int hashcode, int startIndex, int length) {
 			if (this.isLeaf)
 				return;
-			if (this.match(hashcode, startIndex))
+			if (this.match(hashcode, startIndex, length))
 				return;
 			// Get the needed five digits in the hash code
 			int fiveBits = (hashcode << startIndex) >>> 
-					(HashArrayMappedTrie.INTEGER_BIT_LENGTH - HashArrayMappedTrie.LENGTH); 
+					(HashArrayMappedTrie.INTEGER_BIT_LENGTH - length); 
 			this.signature = this.signature | (MASK << fiveBits);
 		}
 		
@@ -69,12 +69,12 @@ public class Node {
 		 * @return true if there is a bucket that has the matching part of the hash code.
 		 * 			False otherwise.
 		 */
-		public boolean match(int hashcode, int startIndex) {
+		public boolean match(int hashcode, int startIndex, int length) {
 			if (this.isLeaf)
 				return false;
 			// Get the needed five digits in the hash code
 			int fiveBits = (hashcode << startIndex) >>> 
-					(HashArrayMappedTrie.INTEGER_BIT_LENGTH - HashArrayMappedTrie.LENGTH);
+					(HashArrayMappedTrie.INTEGER_BIT_LENGTH - length);
 			
 			// Return if we have this bucket in the array
 			return 1 == ((this.signature >>> fiveBits) & MASK);
@@ -86,14 +86,14 @@ public class Node {
 		 * @param startIndex is the start index of the hash code.
 		 * @return the node if one is found. Null otherwise.
 		 */
-		public Node getMatchNode(int hashcode, int startIndex) {
+		public Node getMatchNode(int hashcode, int startIndex, int length) {
 			if (this.isLeaf) 
 				return null;
-			if (!this.match(hashcode, startIndex))
+			if (!this.match(hashcode, startIndex, length))
 				return null;
 			// Get the needed five digits in the hash code
 			int fiveBits = (hashcode << startIndex) >>> 
-					(HashArrayMappedTrie.INTEGER_BIT_LENGTH - HashArrayMappedTrie.LENGTH);
+					(HashArrayMappedTrie.INTEGER_BIT_LENGTH - length);
 			
 			// Get the index of the match node in the list
 			int index = Integer.bitCount(this.signature >>> (fiveBits + 1));

@@ -4,13 +4,25 @@
  *
  */
 public class HashArrayMappedTrie {
-	public static final int INTEGER_BIT_LENGTH = 32;
-	public static final int LENGTH = 4;
+	public static final int INTEGER_BIT_LENGTH = 32; // Default number of bits of an integer
+	public static final int DEFAULT_LENGTH = 4; // Default length in one level
 	
-	private Node root;
+	private int length; // Length in one level
+	
+	private Node root; // Root node
+	
+	/**
+	 * Initialize the object with the length parameter.
+	 * @param length
+	 */
+	public HashArrayMappedTrie(int length) {
+		this.length = length;
+		root = new Node(false);
+	}
 	
 	public HashArrayMappedTrie() {
-		root = new Node(false);
+		// Set to the default argument if no argument is passed in
+		this(DEFAULT_LENGTH);
 	}
 	
 	/**
@@ -23,8 +35,8 @@ public class HashArrayMappedTrie {
 		int i = 0;
 		
 		// Go through all the branches that match the hash code
-		while (i <= INTEGER_BIT_LENGTH / LENGTH) {
-			Node match = node.getMatchNode(hashcode, LENGTH * i);
+		while (i <= INTEGER_BIT_LENGTH / length) {
+			Node match = node.getMatchNode(hashcode, length * i, length);
 			
 			// If there's no matches, break the loop
 			if (match == null) {
@@ -35,17 +47,30 @@ public class HashArrayMappedTrie {
 		}
 		
 		// Create all the needed branch
-		while (i <= INTEGER_BIT_LENGTH / LENGTH) {
+		while (i <= INTEGER_BIT_LENGTH / length) {
 			Node newNode;
 			
 			// Determine if the new node is a leaf or not
-			if (i != INTEGER_BIT_LENGTH / LENGTH)
-				newNode = new Node(false);
-			else 
+			if (INTEGER_BIT_LENGTH % length == 0 && i == INTEGER_BIT_LENGTH / length)
 				newNode = new Node(true);
+			else 
+				newNode = new Node(false);
 			
 			// Add the signature to the node
-			node.addSignature(hashcode, i * LENGTH);
+			node.addSignature(hashcode, i * length, length);
+			
+			// Add the new node to the children of this node
+			node.next.add(newNode);
+			node = newNode;
+			i++;
+		}
+		
+		// Extra check if we run out of the bits
+		if (INTEGER_BIT_LENGTH % length != 0) {
+			Node newNode = new Node(true);
+			
+			// Add the signature to the node
+			node.addSignature(hashcode, i * length, length);
 			
 			// Add the new node to the children of this node
 			node.next.add(newNode);
@@ -68,8 +93,8 @@ public class HashArrayMappedTrie {
 		int i = 0;
 		
 		// Go thru all the branch to see if there's a match
-		while (i <= INTEGER_BIT_LENGTH / LENGTH) {
-			Node match = node.getMatchNode(hashcode, i * LENGTH);
+		while (i <= INTEGER_BIT_LENGTH / length) {
+			Node match = node.getMatchNode(hashcode, i * length, length);
 			
 			// If there's no match for this element, return false
 			if (match == null)
